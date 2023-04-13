@@ -48,7 +48,7 @@ def visCollate(batch):
 
     for sample in batch:
         coch, stFrames, frame0, material = sample
-        cochBatch.append(torch.from_numpy(coch))
+        cochBatch.append(torch.from_numpy(coch).float())
         stFramesTensor = torch.stack([normalize(torch.from_numpy(frame)) for frame in stFrames])
         stFramesBatch.append(stFramesTensor)
         frame0Batch.append(normalize(torch.from_numpy(frame0)))
