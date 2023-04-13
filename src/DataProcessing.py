@@ -12,7 +12,7 @@ from collections import defaultdict
 from typing import List, Tuple
 
 from joblib import Parallel, delayed
-from multiprocessing import Manager
+from multiprocessing import Lock, Manager
 
 from VISDataPoint import VISDataPoint
 from utils import NoStdStreams
@@ -64,22 +64,27 @@ def createDatapointsFromFile(file_name, frame_size=(224, 224), window_duration=0
 
 def processFile(file_name, idx, total_files):
     print(f"Processing file {idx+1}/{total_files}", end='\r')
+    global readLock
     try:
         with NoStdStreams():
             data_points = createDatapointsFromFile(file_name)
         for data_point in data_points:
-            with open(f'/scratch/kapur/train/{sharedMem["n_points"]}.pkl', 'wb') as f:
-                pickle.dump(data_point, f)
+            readLock.acquire()
+            n_points = sharedMem['n_points']
             sharedMem['n_points'] += 1
+            readLock.release()
+            with open(f'/scratch/kapur/train/{n_points}.pkl', 'wb') as f:
+                pickle.dump(data_point, f)
     except:
         pass
 
 manager = Manager()
 sharedMem = manager.dict()
+readLock = manager.RLock()
 
 if __name__ == "__main__":
     with open('../../data/train.txt', 'r') as f:
-        file_names = [x.strip() for x in f.readlines()] 
+        file_names = [x.strip() for x in f.readlines()][:50] 
 
     root = '../../data/'
 
