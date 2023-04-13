@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
     sharedMem['n_points'] = 0
 
-    Parallel(n_jobs=8)(delayed(processFile)(file_name, idx, len(file_names)) for (idx, file_name) in enumerate(file_names))
+    Parallel(n_jobs=-1)(delayed(processFile)(file_name, idx, len(file_names)) for (idx, file_name) in enumerate(file_names))
 
     print()
     print(f"Total Data Points written: {sharedMem['n_points']}")
