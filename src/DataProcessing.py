@@ -73,7 +73,7 @@ def processFile(file_name, idx, total_files):
             n_points = sharedMem['n_points']
             sharedMem['n_points'] += 1
             readLock.release()
-            with open(f'/scratch/kapur/train/{n_points}.pkl', 'wb') as f:
+            with open(f'/scratch/kapur/test/{n_points}.pkl', 'wb') as f:
                 pickle.dump(data_point, f)
     except:
         pass
@@ -83,8 +83,8 @@ sharedMem = manager.dict()
 readLock = manager.RLock()
 
 if __name__ == "__main__":
-    with open('../../data/train.txt', 'r') as f:
-        file_names = [x.strip() for x in f.readlines()][:50] 
+    with open('../../data/test.txt', 'r') as f:
+        file_names = [x.strip() for x in f.readlines()] 
 
     root = '../../data/'
 
