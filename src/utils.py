@@ -1,8 +1,10 @@
 import os
 import sys
 import numpy as np
+import torch
 
 from pycochleagram.cochleagram import invert_cochleagram
+from torchvision import transforms
 
 class NoStdStreams(object):
     """
@@ -32,3 +34,24 @@ def waveFromCochleagram(cochleagram:np.ndarray):
     with NoStdStreams():
         wave = invert_cochleagram(cochleagram, 96000, 40, 100, 10000, 1, downsample=90, nonlinearity='power')[0]
     return wave
+
+def visCollate(batch):
+    cochBatch = []
+    stFramesBatch = []
+    frame0Batch = []
+    materialBatch = []
+
+    mean = [0.485, 0.456, 0.406]
+    std = [0.229, 0.224, 0.225]
+
+    normalize = transforms.Normalize(mean=mean, std=std)
+
+    for sample in batch:
+        coch, stFrames, frame0, material = sample
+        cochBatch.append(torch.from_numpy(coch))
+        stFramesTensor = torch.stack([normalize(torch.from_numpy(frame)) for frame in stFrames])
+        stFramesBatch.append(stFramesTensor)
+        frame0Batch.append(normalize(torch.from_numpy(frame0)))
+        materialBatch.append(material)
+
+    return torch.stack(cochBatch), torch.stack(stFramesBatch), torch.stack(frame0Batch), torch.tensor(materialBatch)
