@@ -36,3 +36,18 @@ class VISDataPoint:
     @property
     def material(self) -> str:
         return self._material
+    
+class VISDataPointV2:
+
+    """
+    New data point encapsulation for experiments with VideoMAE
+    Frames -> List of 16 RGB frames of size 224x224
+    Cochleagram -> 42x45 cochleagram
+    Material -> String containing the material name
+    """
+
+    def __init__(self, cochleagram:np.ndarray, frames:List[np.ndarray], material:str) -> None:
+
+        self.cochleagram = cochleagram.astype(np.float16)
+        self.frames = frames
+        self.material = material
