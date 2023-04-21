@@ -77,3 +77,23 @@ class VISLoss(nn.Module):
             loss += self.rho(r)
 
         return loss.mean()
+    
+    
+class AudioDataset(Dataset):
+    def __init__(self, root : str, freq=12000):
+        self.root = root
+        self.files = glob.glob(os.path.join(self.root, '*.pkl'))
+        self.freq = freq
+        
+    def __len__(self):
+        return len(self.files)
+    
+    def __getitem__(self, idx):
+        fileName = os.path.join(self.root, f'{idx}.pkl')
+        
+        with open(fileName, 'rb') as f:
+            wav = pickle.load(f)
+        
+        downsampled = wav[::wav.shape[0]//self.freq]
+        
+        return torch.tensor(downsampled)
