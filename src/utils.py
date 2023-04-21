@@ -55,3 +55,19 @@ def visCollate(batch):
         materialBatch.append(material)
 
     return torch.stack(cochBatch), torch.stack(stFramesBatch), torch.stack(frame0Batch), torch.tensor(materialBatch)
+
+def visCollateV2(batch):
+    cochBatch = []
+    stackBatch = []
+    materialBatch = []
+
+    for sample in batch:
+        coch, stack, material = sample
+        cochBatch.append(torch.from_numpy(coch).float())
+        stackBatch.append(torch.from_numpy(stack))
+        materialBatch.append(material)
+    cochBatch = torch.stack(cochBatch)
+    stackBatch = torch.stack(stackBatch)
+    materialBatch = torch.tensor(materialBatch)
+
+    return cochBatch, stackBatch, materialBatch
