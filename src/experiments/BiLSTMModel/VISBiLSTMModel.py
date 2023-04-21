@@ -20,6 +20,7 @@ class VISBiLSTMModel(pl.LightningModule):
         self.fc = nn.Linear(fc_hidden_dim, outputSize)
 
         self.loss_fn = nn.MSELoss()
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, stFrames, frame0):
 
@@ -43,6 +44,7 @@ class VISBiLSTMModel(pl.LightningModule):
         X, _ = self.lstm(X)
 
         out = self.fc(X).transpose(1, 2)
+        out = self.sigmoid(out)
         
         return out
     

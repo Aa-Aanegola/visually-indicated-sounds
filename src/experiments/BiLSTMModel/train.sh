@@ -6,7 +6,7 @@
 #SBATCH --gres=gpu:1
 #SBATCH --mem-per-cpu=3G
 #SBATCH --time=4-00:00:00
-#SBATCH -o slurm_logs/mse_bi_plaf.out
+#SBATCH -o slurm_logs/mse_bi_sigmoid_plaf_.out
 
 # source $CONDA_PREFIX/bin/activate /scratch/arihanth.srikar/pytorch_env
 # export LD_LIBRARY_PATH=$CONDA_PREFIX/lib

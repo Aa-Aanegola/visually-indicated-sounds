@@ -38,3 +38,5 @@ trainer = pl.Trainer(accelerator='gpu', devices=1,
                      callbacks=[checkpoint_callback])
 
 trainer.fit(model, trainDataLoader, valDataLoader)
+
+trainer.save_checkpoint('model_weights/final-bilstm-mode.ckpt')
