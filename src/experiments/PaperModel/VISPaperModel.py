@@ -16,8 +16,10 @@ class VISPaperModel(pl.LightningModule):
             param.requires_grad = False
 
         self.lstm = nn.LSTM(512, 256, batch_first=True)
-        self.fc = nn.Linear(256, outputSize)
-
+        self.clf = nn.Sequential(
+            nn.Linear(256, 256), 
+            nn.Linear(256, outputSize),
+            nn.Sigmoid())
 
     def forward(self, stFrames, frame0):
 
@@ -31,16 +33,17 @@ class VISPaperModel(pl.LightningModule):
             stFrameFeatures.append(currStFrameFeatures)
         stFrameFeatures = torch.stack(stFrameFeatures, dim=1)
 
-        # tried but didn't do well
+        X = stFrameFeatures
+
+        # to include color frame uncomment the following lines
         # frame0Features = self.featureExtractor(frame0).unsqueeze(1).repeat(1, stFrames.shape[1], 1)
         # X = torch.cat([stFrameFeatures, frame0Features], dim=2)
-        X = stFrameFeatures
         
         X.detach_()
         # X is the input to the LSTM -> batchx45x1024
         X, _ = self.lstm(X)
 
-        out = self.fc(X).transpose(1, 2)
+        out = self.clf(X).transpose(1, 2)
         
         return out
     
