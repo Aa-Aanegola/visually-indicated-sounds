@@ -6,8 +6,8 @@
 #SBATCH --gres=gpu:1
 #SBATCH --mem-per-cpu=3G
 #SBATCH --time=4-00:00:00
-#SBATCH -o slurm_logs/audio_norm_plaf.out
+#SBATCH -o slurm_logs/audio_conv_plaf.out
 
 export PYTHONUNBUFFERED=1
 
-python AudioAutoEncoder.py
+python TrainAudioAutoEncoderConv.py
