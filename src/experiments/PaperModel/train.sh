@@ -1,5 +1,6 @@
 #!/bin/bash
 #SBATCH -J vis_indicated
+
 #SBATCH -c 9
 #SBATCH --gres=gpu:1
 #SBATCH --time=4-00:00:00

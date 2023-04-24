@@ -4,11 +4,13 @@ import numpy as np
 import glob
 import torch
 import torch.nn as nn
+import tickle
 
 from typing import Tuple, List
 from torch.utils.data import Dataset
+from transformers import VideoMAEFeatureExtractor
 
-from VISDataPoint import VISDataPoint
+from VISDataPoint import VISDataPoint, VISDataPointV2
     
 class VISDataset(Dataset):
 
@@ -53,6 +55,49 @@ class VISDataset(Dataset):
 
     def __len__(self) -> int:
         return len(self.files)
+    
+class VISDatasetV2(Dataset):
+
+    materials = ['None',
+                 'rock',
+                 'leaf',
+                 'water',
+                 'wood',
+                 'plastic-bag',
+                 'ceramic',
+                 'metal',
+                 'dirt',
+                 'cloth',
+                 'plastic',
+                 'tile',
+                 'gravel',
+                 'paper',
+                 'drywall',
+                 'glass',
+                 'grass',
+                 'carpet']
+    
+    def __init__(self, root:str) -> None:
+        self.root = root
+        self.files = glob.glob(os.path.join(self.root, '*.tkl'))
+        self.processor = VideoMAEFeatureExtractor('MCG-NJU/videomae-base-finetuned-kinetics')
+
+    def __getitem__(self, index) -> Tuple[np.ndarray, np.ndarray, int]:
+        
+        fileName = os.path.join(self.root, f'{index}.tkl')
+
+        dataPoint: VISDataPointV2 = tickle.load(fileName)
+
+        coch = dataPoint.cochleagram
+        stack = [frame.transpose(2,0,1) for frame in dataPoint.frames]
+        framestack = self.processor(stack, return_tensors='np')['pixel_values'].squeeze(0)
+        material = dataPoint.material
+
+        return coch, framestack, VISDatasetV2.materials.index(material)
+    
+    def __len__(self) -> int:
+        return len(self.files)
+    
 
 
 class VISLoss(nn.Module):

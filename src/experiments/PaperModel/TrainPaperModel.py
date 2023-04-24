@@ -20,7 +20,7 @@ valDataLoader = DataLoader(valDataset, batch_size=BATCH_SIZE, collate_fn=visColl
 
 model = VISPaperModel(outputSize=42)
 
-logger = pl.loggers.TensorBoardLogger('tb_logs', name='trivial_model')
+logger = pl.loggers.TensorBoardLogger('tb_logs', name='PaperModel')
 
 trainer = pl.Trainer(accelerator='gpu', devices=1,
                      max_epochs=100, logger=logger)

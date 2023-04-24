@@ -47,12 +47,15 @@ def createDatapointsFromFile(file_name, frame_size=(224,224), window_duration=0.
         start_time = peak_time - window_duration/2
 
         start_frame = int(start_time * frame_rate)
-        end_frame = start_frame + int(frame_rate * window_duration)
-        window_frames = frames[start_frame:end_frame+2]
+        end_frame = start_frame + 16
+        window_frames = frames[start_frame:end_frame]
 
         start_sound = int(start_time * sample_rate)
         end_sound = start_sound + int(sample_rate * window_duration)
         window_sound = wav[start_sound:end_sound]
+
+        if len(window_frames) != 16:
+            continue
 
         coch = human_cochleagram(window_sound, sample_rate, n=40, low_lim=100, hi_lim=10000, sample_factor=1, downsample=90, nonlinearity='power')
 
@@ -72,7 +75,7 @@ def processFile(file_name, idx, total_files):
             sharedMem['n_points'] += 1
             readLock.release()
             tickle.dump(data_point, f'/scratch/kapur/test/{n_points}.tkl')
-    except:
+    except Exception as e:
         pass
 
 manager = Manager()
