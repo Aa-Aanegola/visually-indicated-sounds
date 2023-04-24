@@ -13,10 +13,11 @@ import librosa
 from librosa.feature import spectral_centroid
 
 class Evaluator:
-    def __init__(self, wavs, gt_wavs, num_batches=250):
+    def __init__(self, wavs, gt_wavs, num_batches=250, sr=96000):
         self.wavs = wavs
         self.gt_wavs = gt_wavs
         self.num_batches = num_batches
+        self.sr = sr
         
     def get_metrics(self):
         metrics = {}

@@ -32,7 +32,7 @@ checkpoint_callback = ModelCheckpoint(
         monitor="val_loss",
         mode="min",
         dirpath="model_weights",
-        filename="vmae-aae-model-{epoch:02d}-{val_loss:.2f}",
+        filename="vmae-model-{epoch:02d}-{val_loss:.2f}",
     )
 trainer = pl.Trainer(accelerator='gpu', devices=1, 
                      max_epochs=EPOCHS, logger=logger,

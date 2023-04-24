@@ -5,6 +5,7 @@ import torch
 
 from pycochleagram.cochleagram import invert_cochleagram
 from torchvision import transforms
+from tqdm import tqdm
 
 from joblib import Parallel, delayed
 from typing import List
@@ -39,7 +40,7 @@ def waveFromCochleagram(cochleagram:np.ndarray):
     return wave
 
 def batchWaveFromCochleagram(cochleagrams:List[np.ndarray]):
-    return Parallel(n_jobs=-1)(delayed(waveFromCochleagram)(coch) for coch in cochleagrams)
+    return Parallel(n_jobs=-1)(delayed(waveFromCochleagram)(coch) for coch in tqdm(cochleagrams))
 
 def visCollate(batch):
     cochBatch = []
