@@ -20,11 +20,14 @@ class Evaluator:
         
     def get_metrics(self):
         metrics = {}
+        
         metrics["reconstructable"] = self.reconstructable()
-        metrics["reconstruction_loss"] = self.reconstructable()
-        metrics["loudness_diff"] = self.reconstructable()
-        metrics["spectral_centroid_diff"] = self.reconstructable()
-        metrics["peak_displacement"] = self.reconstructable()
+        metrics["reconstruction_loss"] = self.reconstruction_loss()
+        metrics["loudness_diff"] = self.loudness()
+        metrics["spectral_centroid_diff"] = self.spectral_centroid_difference()
+        metrics["peak_displacement"] = self.peak_displacement()
+
+        return metrics
     
     def _plot_metric(self, metric_arr, metric=""):
         plt.hist(metric_arr)
