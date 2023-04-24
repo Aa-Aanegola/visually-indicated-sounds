@@ -2,15 +2,18 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import pytorch_lightning as pl
+import os
 
 from transformers import VideoMAEForVideoClassification
 from typing import Dict, Any
+
 
 class VISVMAEModel(pl.LightningModule):
 
     def __init__(self):
 
         super().__init__()
+        os.environ['TORCH_HOME'] = 'scratch/arihanth.srikar/'
         self.featureExtractor = VideoMAEForVideoClassification.from_pretrained('MCG-NJU/videomae-base-finetuned-kinetics')
         self.featureExtractor.classifier = nn.Identity()
 

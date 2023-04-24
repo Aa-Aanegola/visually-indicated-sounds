@@ -101,6 +101,26 @@ class VISDatasetV2(Dataset):
         return len(self.files)
  
 class VISDatasetV3(Dataset):
+
+    materials = ['None',
+                'rock',
+                'leaf',
+                'water',
+                'wood',
+                'plastic-bag',
+                'ceramic',
+                'metal',
+                'dirt',
+                'cloth',
+                'plastic',
+                'tile',
+                'gravel',
+                'paper',
+                'drywall',
+                'glass',
+                'grass',
+                'carpet']
+
     def __init__(self, root: str, sr: int=48000):
         self.root = root
         print(os.path.join(self.root, '*.pkl'))
@@ -128,11 +148,11 @@ class VISDatasetV3(Dataset):
 class WaveLoss(nn.Module):
     
     def __init__(self):
-        pass
+        super().__init__()
     
     def forward(self, pred, target):
         
-        error = target * (target - pred)
+        error = torch.exp(1+torch.abs(target)) * (target - pred)
         errorMag = torch.linalg.vector_norm(error, dim=1)
         return errorMag.mean()
 

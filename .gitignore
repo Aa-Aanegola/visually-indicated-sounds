@@ -3,5 +3,4 @@ data/
 pycochleagram/
 lightning_logs/
 slurm_logs/
-src/experiments/AudioAutoEncoder/model_weights/
 src/experiments/AudioAutoEncoder/tb_logs/
