@@ -29,11 +29,12 @@ from VISAudioAutoEncoder import VISVMAEModel, AudioAutoEncoderConv
 from VISTorchUtils import VISDatasetV3
 
 
-
 BATCH_SIZE = 16
 NUM_WORKERS = 8
 
 if __name__ == '__main__':
+    torch.set_float32_matmul_precision('medium')
+    
     aae = AudioAutoEncoderConv()
     aae = aae.load_from_checkpoint('./model_weights/audioautoencoderconvsm-model-epoch=90-val_loss=0.00.ckpt')
     model = VISVMAEModel(aae)
@@ -55,6 +56,5 @@ if __name__ == '__main__':
     trainer = pl.Trainer(accelerator='gpu', devices=1,
                         max_epochs=15, logger=logger,
                         callbacks=[checkpoint_callback])
-    torch.set_float32_matmul_precision('medium')
     
     trainer.fit(model, trainDataLoader, valDataLoader)
