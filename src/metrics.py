@@ -57,7 +57,7 @@ class Evaluator:
         
         return np.array(sample_pcc)
             
-    def reconstructable(self, wavs):
+    def reconstructable(self):
         not_reconstructable = 0
         for wav in self.wavs:
             if np.isnan(wav).any():
