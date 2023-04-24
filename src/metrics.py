@@ -13,25 +13,18 @@ import librosa
 from librosa.feature import spectral_centroid
 
 class Evaluator:
-    def __init__(self, model, dataloader, num_batches=250):
-        self.model = model
-        self.dataloader = dataloader
+    def __init__(self, wavs, gt_wavs, num_batches=250):
+        self.wavs = wavs
+        self.gt_wavs = gt_wavs
         self.num_batches = num_batches
         
     def get_metrics(self):
-        wavs = []
-        for i, data in tqdm(enumerate(self.dataloader)):
-            coch, stFrames, frame0, material = data
-            out = self.model(stFrames, frame0).detach().cpu().numpy() 
-            
-            ret = batchWaveFromCochleagram(out)
-            wavs.extend(ret)
-            print(len(wavs))
-            
-            if i >= self.num_batches-1:
-                break
-        
-        print(self.reconstructable(wavs))
+        metrics = {}
+        metrics["reconstructable"] = self.reconstructable()
+        metrics["reconstruction_loss"] = self.reconstructable()
+        metrics["loudness_diff"] = self.reconstructable()
+        metrics["spectral_centroid_diff"] = self.reconstructable()
+        metrics["peak_displacement"] = self.reconstructable()
     
     def _plot_metric(self, metric_arr, metric=""):
         plt.hist(metric_arr)
@@ -63,33 +56,33 @@ class Evaluator:
             
     def reconstructable(self, wavs):
         not_reconstructable = 0
-        for wav in wavs:
+        for wav in self.wavs:
             if np.isnan(wav).any():
                 not_reconstructable += 1
-        print(not_reconstructable, len(wavs))
-        return 1 - not_reconstructable/len(wavs)
+        print(not_reconstructable, len(self.wavs))
+        return 1 - not_reconstructable/len(self.wavs)
     
-    def reconstruction_loss(self, wavs, gt_wavs, plot=False):
+    def reconstruction_loss(self, plot=False):
         '''Uses the RMSE metric for finding difference between 2 waveforms'''
-        # Make sure to filter wavs and gt_wavs that cannot be reconstructed before this
-        sample_rmse = self._compute_rmse(wavs, gt_wavs)
+        # Make sure to filter self.wavs and gt_wavs that cannot be reconstructed before this
+        sample_rmse = self._compute_rmse(self.wavs, self.gt_wavs)
 
         if plot:
             self._plot_metric(sample_rmse, "reconstruction loss")
 
         return np.mean(sample_rmse)
 
-    def loudness(self, wavs, gt_wavs, plot=False):
-        sample_loudness = self._compute_mse(wavs, gt_wavs)
+    def loudness(self, plot=False):
+        sample_loudness = self._compute_mse(self.wavs, self.gt_wavs)
 
         if plot:
             self._plot_metric(sample_loudness, "loudness loss")
 
         return np.mean(sample_loudness)
 
-    def spectral_centroid_difference(self, wavs, gt_wavs, plot=False):
+    def spectral_centroid_difference(self, plot=False):
         sample_centroid_difference = []
-        for wav, gt_wav in zip(wavs, gt_wavs):
+        for wav, gt_wav in zip(self.wavs, self.gt_wavs):
             # for each time_step one spectral centroid, indication of the domininant frequency that can be heard
             wav_centroids = spectral_centroid(y=wav[22560:25440]+0.01, sr=self.sr)
             gt_centroids = spectral_centroid(y=gt_wav[22560:25440]+0.01, sr=self.sr)
@@ -110,9 +103,9 @@ class Evaluator:
         return np.mean(sample_centroid_difference)
 
 
-    def peak_displacement(self, wavs, gt_wavs, plot=False):
-        wavs_peak_pos = np.argmax(wavs, axis=1)
-        gt_wavs_peak_pos = np.argmax(gt_wavs, axis=1)
+    def peak_displacement(self, plot=False):
+        wavs_peak_pos = np.argmax(self.wavs, axis=1)
+        gt_wavs_peak_pos = np.argmax(self.gt_wavs, axis=1)
         wavs_peak_pos = np.expand_dims(wavs_peak_pos, axis=-1)
         gt_wavs_peak_pos = np.expand_dims(gt_wavs_peak_pos, axis=-1)
         sample_peak_displacement = self._compute_rmse(wavs_peak_pos, gt_wavs_peak_pos)/96
