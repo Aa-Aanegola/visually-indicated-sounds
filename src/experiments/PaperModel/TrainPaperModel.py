@@ -15,8 +15,8 @@ valDataset = VISDataset('/scratch/vis_data/test')
 
 BATCH_SIZE = 16
 
-trainDataLoader = DataLoader(trainDataset, batch_size=BATCH_SIZE, collate_fn=visCollate, shuffle=True, num_workers=6)
-valDataLoader = DataLoader(valDataset, batch_size=BATCH_SIZE, collate_fn=visCollate, num_workers=6)
+trainDataLoader = DataLoader(trainDataset, batch_size=BATCH_SIZE, collate_fn=visCollate, shuffle=True, num_workers=4)
+valDataLoader = DataLoader(valDataset, batch_size=BATCH_SIZE, collate_fn=visCollate, num_workers=4)
 
 model = VISPaperModel(outputSize=42)
 

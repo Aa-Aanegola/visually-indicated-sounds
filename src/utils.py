@@ -6,6 +6,9 @@ import torch
 from pycochleagram.cochleagram import invert_cochleagram
 from torchvision import transforms
 
+from joblib import Parallel, delayed
+from typing import List
+
 class NoStdStreams(object):
     """
     Utility class to silence all output from the code within a block. Usage:
@@ -34,6 +37,9 @@ def waveFromCochleagram(cochleagram:np.ndarray):
     with NoStdStreams():
         wave = invert_cochleagram(cochleagram, 96000, 40, 100, 10000, 1, downsample=90, nonlinearity='power')[0]
     return wave
+
+def batchWaveFromCochleagram(cochleagrams:List[np.ndarray]):
+    return Parallel(n_jobs=-1)(delayed(waveFromCochleagram)(coch) for coch in cochleagrams)
 
 def visCollate(batch):
     cochBatch = []

@@ -2,4 +2,6 @@ __pycache__
 data/
 pycochleagram/
 lightning_logs/
-# checkpoints/
+slurm_logs/
+src/experiments/AudioAutoEncoder/model_weights/
+src/experiments/AudioAutoEncoder/tb_logs/
