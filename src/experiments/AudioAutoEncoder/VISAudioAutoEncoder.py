@@ -50,52 +50,50 @@ class AudioAutoEncoder(pl.LightningModule):
         optimizer = optim.AdamW(self.parameters(), 1e-4)        
         
         
-# class AudioAutoEncoderConv(pl.LightningModule):
-#     def __init__(self, input_size=12000):
-#         super().__init__()
-#         self.encoder = {
-#             'conv1':nn.Conv1d(1, 4, 512), 
-#             'pool1':nn.MaxPool1d(32),
-#             'relu1':nn.ReLU(), 
-#             'conv2':nn.Conv1d(4, 8, 256), 
-#             'pool2':nn.MaxPool1d(16), 
-#             'relu2':nn.ReLU(), 
-#             'conv3':nn.Conv1d(8, 16, 128)   
-#         }
-        
-#         self.decoder = {
-#             'deconv1':nn.ConvTranspose1d(16, 8, 128),
-#             'relu1':nn.ReLU(), 
-#             'unpool1':nn.MaxUnpool1d(16),  
-#             'deconv2':nn.ConvTranspose1d(8, 4, 256), 
-#             'relu2':nn.ReLU(), 
-#             'unpool2':nn.MaxUnpool1d(32), 
-#             'deconv3':nn.ConvTranspose1d(4, 1, 512)}
-        
-        
-#     def forward(self, wav):
-#         # Encode
-#         x, indices1 = self.encoder['pool1'](self.encoder['conv1'](wav.unsqueeze(1)))
-#         x, indices2 = self.encoder['conv2'](self.encoder['relu1'](x))
-        
-#     def get_encoding(self, wav):
-#         return self.encoder(wav)
+class AudioAutoEncoderConv(pl.LightningModule):
+    def __init__(self, input_size=48000):
+        super().__init__()
 
-#     def get_reconstructed(self, emb):
-#         return self.decoder(emb)
+        self.encoder = nn.Sequential(
+            nn.Conv1d(1, 8, 512, stride=16, padding=8, padding_mode='replicate'),
+            nn.RReLU(), 
+            nn.Conv1d(8, 16, 256, stride=4, padding=2, padding_mode='replicate'),
+            nn.RReLU(), 
+            nn.Conv1d(16, 32, 32, stride=2, padding=1, padding_mode='replicate'))        
+        
+        self.decoder = nn.Sequential(
+            nn.ConvTranspose1d(32, 16, 32, stride=2, padding=1),
+            nn.RReLU(), 
+            nn.ConvTranspose1d(16, 8, 256, stride=4, padding=1),
+            nn.RReLU(), 
+            nn.ConvTranspose1d(8, 1, 512, stride=16, padding=8))
+        
+        self.loss_fn = nn.MSELoss()
+        
+        
+    def forward(self, wav):
+        emb = self.encoder(wav.unsqueeze(1))
+        reconstructed = self.decoder(emb).squeeze()
+        return reconstructed
+        
+    def get_encoding(self, wav):
+        return self.encoder(wav.unsqueeze(1))
+
+    def get_reconstructed(self, emb):
+        return self.decoder(emb).squeeze()
     
-#     def training_step(self, batch, batch_idx):
-#         out = self(batch)
-#         loss = nn.MSELoss()(out, batch)
-#         self.log('train_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-#         return loss
+    def training_step(self, batch, batch_idx):
+        out = self(batch)
+        loss = self.loss_fn(out, batch)
+        self.log('train_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        return loss
     
-#     def validation_step(self, batch, batch_idx):
-#         out = self(batch)
-#         loss = nn.MSELoss()(out, batch)
-#         self.log('val_loss',  loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-#         return loss
+    def validation_step(self, batch, batch_idx):
+        out = self(batch)
+        loss = self.loss_fn(out, batch)
+        self.log('val_loss',  loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        return loss
     
-#     def configure_optimizers(self):
-#         optimizer = optim.Adam(self.parameters(), 1e-4)
-#         return optimizer 
+    def configure_optimizers(self):
+        optimizer = optim.AdamW(self.parameters(), 1e-3)
+        return optimizer 

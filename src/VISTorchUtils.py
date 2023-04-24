@@ -5,6 +5,8 @@ import glob
 import torch
 import torch.nn as nn
 import tickle
+from tqdm import tqdm
+from scipy.signal import resample
 
 from typing import Tuple, List
 from torch.utils.data import Dataset
@@ -125,20 +127,24 @@ class VISLoss(nn.Module):
     
     
 class AudioDataset(Dataset):
-    def __init__(self, root : str, freq=12000):
+    def __init__(self, root: str, sr: int=12000):
         self.root = root
         self.files = glob.glob(os.path.join(self.root, '*.pkl'))
-        self.freq = freq
+        self.sr = sr
+
+        self.wavs = []
+        for fileName in tqdm(self.files, desc='Loading files into RAM'):
+            with open(fileName, 'rb') as f:
+                wav = pickle.load(f)
+                if wav.shape[0]:
+                    self.wavs.append(wav)
         
     def __len__(self):
-        return len(self.files)
+        return len(self.wavs)
     
     def __getitem__(self, idx):
-        fileName = os.path.join(self.root, f'{idx}.pkl')
-        
-        with open(fileName, 'rb') as f:
-            wav = pickle.load(f)
-        
-        downsampled = wav[::wav.shape[0]//self.freq]
-        
-        return torch.tensor(downsampled)
+        wav = self.wavs[idx]
+        downsampled = resample(wav, self.sr)
+        downsampled = downsampled / np.max(np.abs(downsampled))
+
+        return torch.tensor(downsampled, dtype=torch.float32)

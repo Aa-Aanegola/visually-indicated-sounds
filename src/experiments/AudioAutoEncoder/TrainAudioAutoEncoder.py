@@ -69,29 +69,6 @@ class AudioAutoEncoder(pl.LightningModule):
     def configure_optimizers(self):
         optimizer = optim.AdamW(self.parameters(), 1e-3)
         return optimizer 
-
-class AudioDataset(Dataset):
-    def __init__(self, root: str, sr: int=12000):
-        self.root = root
-        self.files = glob.glob(os.path.join(self.root, '*.pkl'))
-        self.sr = sr
-
-        self.wavs = []
-        for fileName in tqdm(self.files, desc='Loading files into RAM'):
-            with open(fileName, 'rb') as f:
-                wav = pickle.load(f)
-                if wav.shape[0]:
-                    self.wavs.append(wav)
-        
-    def __len__(self):
-        return len(self.wavs)
-    
-    def __getitem__(self, idx):
-        wav = self.wavs[idx]
-        downsampled = resample(wav, self.sr)
-        downsampled = downsampled / np.max(np.abs(downsampled))
-
-        return torch.tensor(downsampled, dtype=torch.float32)
     
 if __name__=='__main__':
     BATCH_SIZE = 16
