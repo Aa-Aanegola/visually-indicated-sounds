@@ -51,3 +51,18 @@ class VISDataPointV2:
         self.cochleagram = cochleagram.astype(np.float16)
         self.frames = frames
         self.material = material
+        
+        
+        
+class VISDataPointV3:
+    """Data point for VMAE + AudioAutoEncoder experiments
+
+    Frames: list of 16 RGB frames 
+    Material: String containing the material name
+    Wav: The waveform
+    """
+    
+    def __init__(self, frames:List[np.ndarray], material:str, wav:np.ndarray) -> None:
+        self.frames = frames
+        self.material = material
+        self.wav = wav

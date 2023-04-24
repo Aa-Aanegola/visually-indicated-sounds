@@ -12,7 +12,7 @@ from typing import Tuple, List
 from torch.utils.data import Dataset
 from transformers import VideoMAEFeatureExtractor
 
-from VISDataPoint import VISDataPoint, VISDataPointV2
+from VISDataPoint import VISDataPoint, VISDataPointV2, VISDataPointV3
     
 class VISDataset(Dataset):
 
@@ -99,7 +99,42 @@ class VISDatasetV2(Dataset):
     
     def __len__(self) -> int:
         return len(self.files)
+ 
+class VISDatasetV3(Dataset):
+    def __init__(self, root: str, sr: int=48000):
+        self.root = root
+        print(os.path.join(self.root, '*.pkl'))
+        self.files = glob.glob(os.path.join(self.root, '*.tkl'))
+        self.processor = VideoMAEFeatureExtractor('MCG-NJU/videomae-base-finetuned-kinetics')
+        self.sr = sr
+        
+    def __len__(self):
+        return len(self.files)
+
+    def __getitem__(self, idx):
+        fileName = self.files[idx]
+        dataPoint: VISDataPointV3 = tickle.load(fileName)
+        
+        frames = dataPoint.frames
+        material = dataPoint.material
+        wav = resample(dataPoint.wav, self.sr)
+        wav /= np.max(np.abs(wav))
+        
+        fstack = [frame.transpose(2,0,1) for frame in dataPoint.frames]
+        fstack = self.processor(fstack, return_tensors='np')['pixel_values'].squeeze(0)
+        return torch.tensor(fstack, dtype=torch.float32), material, torch.tensor(wav, dtype=torch.float32)
+
+
+class WaveLoss(nn.Module):
     
+    def __init__(self):
+        pass
+    
+    def forward(self, pred, target):
+        
+        error = target * (target - pred)
+        errorMag = torch.linalg.vector_norm(error, dim=1)
+        return errorMag.mean()
 
 
 class VISLoss(nn.Module):
@@ -127,7 +162,7 @@ class VISLoss(nn.Module):
     
     
 class AudioDataset(Dataset):
-    def __init__(self, root: str, sr: int=12000):
+    def __init__(self, root: str, sr: int=48000):
         self.root = root
         self.files = glob.glob(os.path.join(self.root, '*.pkl'))
         self.sr = sr
@@ -148,3 +183,4 @@ class AudioDataset(Dataset):
         downsampled = downsampled / np.max(np.abs(downsampled))
 
         return torch.tensor(downsampled, dtype=torch.float32)
+    
