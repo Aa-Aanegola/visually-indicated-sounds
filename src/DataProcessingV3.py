@@ -71,7 +71,7 @@ def processFile(file_name, idx, total_files):
             n_points = sharedMem['n_points']
             sharedMem['n_points'] += 1
             readLock.release()
-            tickle.dump(data_point, f'/scratch/aanegola/train/{n_points}.tkl')
+            tickle.dump(data_point, f'/scratch/aanegola/test/{n_points}.tkl')
     except Exception as e:
         pass
 
@@ -80,7 +80,7 @@ sharedMem = manager.dict()
 readLock = manager.RLock()
 
 if __name__ == "__main__":
-    with open('../data/vis-data-256/train.txt', 'r') as f:
+    with open('../data/vis-data-256/test.txt', 'r') as f:
         file_names = [x.strip() for x in f.readlines()]
 
     root = '../data/vis-data-256/'

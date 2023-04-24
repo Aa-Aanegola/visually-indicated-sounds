@@ -31,7 +31,7 @@ from VISTorchUtils import VISDatasetV3
 
 
 BATCH_SIZE = 16
-NUM_WORKERS = 1
+NUM_WORKERS = 8
 
 if __name__ == '__main__':
     aae = AudioAutoEncoderConv()
@@ -53,7 +53,7 @@ if __name__ == '__main__':
         filename="vmae-aae-model-{epoch:02d}-{val_loss:.2f}",
     )
     trainer = pl.Trainer(accelerator='gpu', devices=1,
-                        max_epochs=10, logger=logger,
+                        max_epochs=15, logger=logger,
                         callbacks=[checkpoint_callback])
     torch.set_float32_matmul_precision('medium')
     
