@@ -5,23 +5,14 @@ This directory holds the implementation of `VISVMAEModel`, an entirely new appro
 ```mermaid
 flowchart LR
 
-in1(Wave)
-encoder[Encoder]
-decoder[Decoder]
-out1("Wave (Reconstructed)")
-
-in2(16 RGB Frames)
+in(16 RGB Frames)
 featureExtractor[VideoMAE]
 mlp[MLP Head]
+reshape{Reshape}
+out(Cochleagram)
 
-loss{Loss}
-
-in2 -->|Nx16x3x224x224| featureExtractor
+in -->|Nx16x3x224x224| featureExtractor
 featureExtractor -->|Nx768| mlp
-mlp --> |Nx2048|decoder
-decoder -->|Nx48000| out1
-
-in1 -->|Nx48000| encoder
-encoder -->|Nx2048|loss
-mlp --> |Nx2048|loss
+mlp -->|Nx1890|reshape
+reshape -->|Nx45x42| out
 ```
